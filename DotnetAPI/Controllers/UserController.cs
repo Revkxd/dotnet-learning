@@ -18,11 +18,19 @@ public class UserController : ControllerBase
         return _dapper.LoadDataSingle<DateTime>("SELECT GETDATE()");
     }
 
-    [HttpGet("GetUsers/{testValue}")]
-    // public IEnumerable<WeatherForecast> Get()
-    public string[] GetUsers(string testValue)
+    [HttpGet("GetUsers")]
+    public IEnumerable<User> GetUsers()
     {
-        return new string[] { "user1", "user2", testValue };
+        string sql = @"
+            SELECT [UserId],
+                [FirstName],
+                [LastName],
+                [Email],
+                [Gender],
+                [Active] 
+            FROM TutorialAppSchema.Users";
+        IEnumerable<User> users = _dapper.LoadData<User>(sql);
+        return users;
         // return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         // {
         //     Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
@@ -30,5 +38,20 @@ public class UserController : ControllerBase
         //     Summary = Summaries[Random.Shared.Next(Summaries.Length)]
         // })
         // .ToArray();
+    }
+
+    [HttpGet("GetSingleUser/{userId}")]
+    public User GetSingleUser(int userId)
+    {
+        string sql = @"
+        SELECT [UserId],
+            [FirstName],
+            [LastName],
+            [Email],
+            [Gender],
+            [Active] 
+        FROM TutorialAppSchema.Users
+            WHERE UserId = " + userId.ToString();
+        return _dapper.LoadDataSingle<User>(sql);
     }
 }
