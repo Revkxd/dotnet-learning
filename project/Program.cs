@@ -5,53 +5,51 @@ using Microsoft.Extensions.Configuration;
 using Dapper;
 using project.Models;
 using project.Data;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace project {
     public class Program {
         static void Main(string[] args) {
-            IConfiguration configuration = new ConfigurationBuilder()
+            IConfiguration config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
-            DataContextDapper dapper = new DataContextDapper(configuration);
-            DataContextEF entityFramework = new DataContextEF(configuration);
+            DataContextDapper dapper = new DataContextDapper(config);
 
-            DateTime rightnow = dapper.LoadDataSingle<DateTime>("SELECT GETDATE()");
-            Console.WriteLine(rightnow);
+            // string sql = @"INSERT INTO TutorialAppSchema.Computer (
+            //     Motherboard,
+            //     HasWifi,
+            //     HasLTE,
+            //     ReleaseDate,
+            //     Price,
+            //     VideoCard
+            // ) VALUES ('" + myComputer.Motherboard
+            //     + "', '" + myComputer.HasWifi
+            //     + "', '" + myComputer.HasLTE
+            //     + "', '" + myComputer.ReleaseDate
+            //     + "', '" + myComputer.Price
+            //     + "', '" + myComputer.VideoCard
+            // + "')\n";
 
-            Computer myComputer = new Computer() {
-                Motherboard = "Z690",
-                HasWifi = true,
-                HasLTE = false,
-                ReleaseDate = DateTime.Now,
-                Price = 943.87m,
-                VideoCard = "RTX 2060"
-            };
+            string computersJson = File.ReadAllText("Computers.json");
 
-            // entityFramework.Add(myComputer);
-            entityFramework.SaveChanges();
+            // JsonSerializerOptions options = new JsonSerializerOptions {
+            //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            // };
+            // IEnumerable<Computer>? computers = JsonConvert.DeserializeObject<IEnumerable<Computer>>(computersJson, options);
+            IEnumerable<Computer>? computers = JsonConvert.DeserializeObject<IEnumerable<Computer>>(computersJson);
 
-            string sql = @"INSERT INTO TutorialAppSchema.Computer (
-                Motherboard,
-                HasWifi,
-                HasLTE,
-                ReleaseDate,
-                Price,
-                VideoCard
-            ) VALUES ('" + myComputer.Motherboard
-                + "', '" + myComputer.HasWifi
-                + "', '" + myComputer.HasLTE
-                + "', '" + myComputer.ReleaseDate
-                + "', '" + myComputer.Price
-                + "', '" + myComputer.VideoCard
-            + "')\n";
+            if(computers != null) {
+                foreach(Computer computer in computers) {
+                    Console.WriteLine(computer.Motherboard);
+                }
+            }
 
-            File.WriteAllText("log.txt", sql);
+            string computersCopy = JsonConvert.SerializeObject(computers);
+            File.WriteAllText("computersCopyNewtonsoft.txt", computersCopy);
 
-            using StreamWriter openFile = new ("log.txt", append:true);
-            openFile.WriteLine(sql);
-            openFile.Close();
-
-            Console.WriteLine(File.ReadAllText("log.txt"));
+            string computersCopySystem = System.Text.Json.JsonSerializer.Serialize(computers);
+            File.WriteAllText("computersCopySystem.txt", computersCopySystem);
         }
     }
 }
