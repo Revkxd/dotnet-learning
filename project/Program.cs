@@ -27,7 +27,7 @@ namespace project {
                 VideoCard = "RTX 2060"
             };
 
-            entityFramework.Add(myComputer);
+            // entityFramework.Add(myComputer);
             entityFramework.SaveChanges();
 
             string sql = @"INSERT INTO TutorialAppSchema.Computer (
@@ -43,51 +43,15 @@ namespace project {
                 + "', '" + myComputer.ReleaseDate
                 + "', '" + myComputer.Price
                 + "', '" + myComputer.VideoCard
-            + "')";
+            + "')\n";
 
-            // int result = dapper.ExecuteSqlWithRowCount(sql);
-            // bool result = dapper.ExecuteSql(sql);
-            // Console.WriteLine(result);
+            File.WriteAllText("log.txt", sql);
 
-            string sqlSelect = @"SELECT
-                Computer.ComputerId,
-                Computer.Motherboard,
-                Computer.HasWifi,
-                Computer.HasLTE,
-                Computer.ReleaseDate,
-                Computer.Price,
-                Computer.VideoCard
-            FROM TutorialAppSchema.Computer";
+            using StreamWriter openFile = new ("log.txt", append:true);
+            openFile.WriteLine(sql);
+            openFile.Close();
 
-            IEnumerable<Computer> computers = dapper.LoadData<Computer>(sqlSelect);
-
-            Console.WriteLine("'ComputerId', 'Motherboard', 'HasWifi', 'HasLTE', 'ReleaseDate', 'Price', 'VideoCard'");
-            foreach (Computer singleComputer in computers) {
-                Console.WriteLine("'" + singleComputer.ComputerId
-                + "', '" + singleComputer.Motherboard
-                + "', '" + singleComputer.HasWifi
-                + "', '" + singleComputer.HasLTE
-                + "', '" + singleComputer.ReleaseDate
-                + "', '" + singleComputer.Price
-                + "', '" + singleComputer.VideoCard + "'");
-            }
-            Console.WriteLine();
-
-            IEnumerable<Computer>? computersEf = entityFramework.Computer?.ToList<Computer>();
-
-            if(computersEf != null){
-                Console.WriteLine("'ComputerId', 'Motherboard', 'HasWifi', 'HasLTE', 'ReleaseDate', 'Price', 'VideoCard'");
-                foreach (Computer singleComputer in computersEf) {
-                    Console.WriteLine("'" + singleComputer.ComputerId
-                    + "', '" + singleComputer.Motherboard
-                    + "', '" + singleComputer.HasWifi
-                    + "', '" + singleComputer.HasLTE
-                    + "', '" + singleComputer.ReleaseDate
-                    + "', '" + singleComputer.Price
-                    + "', '" + singleComputer.VideoCard + "'");
-                }
-                Console.WriteLine();
-            }
+            Console.WriteLine(File.ReadAllText("log.txt"));
         }
     }
 }
