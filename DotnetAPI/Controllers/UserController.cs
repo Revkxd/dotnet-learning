@@ -6,11 +6,16 @@ namespace DotnetAPI.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly ILogger<WeatherForecastController> _logger;
-
-    public UserController(ILogger<WeatherForecastController> logger)
+    DataContextDapper _dapper;
+    public UserController(IConfiguration config)
     {
-        _logger = logger;
+        _dapper = new DataContextDapper(config);
+    }
+
+    [HttpGet("TestConnection")]
+    public DateTime TestConnection()
+    {
+        return _dapper.LoadDataSingle<DateTime>("SELECT GETDATE()");
     }
 
     [HttpGet("GetUsers/{testValue}")]
