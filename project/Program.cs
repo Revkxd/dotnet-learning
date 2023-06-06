@@ -1,15 +1,19 @@
 ﻿using System;
-using project.Models;
-using Microsoft.Data.SqlClient;
 using System.Data;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Dapper;
+using project.Models;
 using project.Data;
 
 namespace project {
     public class Program {
         static void Main(string[] args) {
-            DataContextDapper dapper = new DataContextDapper();
-            DataContextEF entityFramework = new DataContextEF();
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+            DataContextDapper dapper = new DataContextDapper(configuration);
+            DataContextEF entityFramework = new DataContextEF(configuration);
 
             DateTime rightnow = dapper.LoadDataSingle<DateTime>("SELECT GETDATE()");
             Console.WriteLine(rightnow);
